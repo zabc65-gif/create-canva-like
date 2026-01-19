@@ -1,0 +1,114 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --canvas-bg: #f1f5f9;
+  --toolbar-bg: #ffffff;
+  --sidebar-bg: #ffffff;
+  --border-color: #e2e8f0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar personnalisée */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Classes utilitaires pour l'éditeur */
+@layer components {
+  .editor-container {
+    @apply h-full w-full flex flex-col bg-dark-100;
+  }
+
+  .canvas-area {
+    @apply flex-1 overflow-hidden relative;
+    background-color: var(--canvas-bg);
+    background-image:
+      linear-gradient(45deg, #e2e8f0 25%, transparent 25%),
+      linear-gradient(-45deg, #e2e8f0 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #e2e8f0 75%),
+      linear-gradient(-45deg, transparent 75%, #e2e8f0 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+  }
+
+  .toolbar {
+    @apply h-14 flex items-center px-4 gap-2 bg-white border-b border-dark-200;
+  }
+
+  .sidebar {
+    @apply w-72 bg-white border-r border-dark-200 flex flex-col;
+  }
+
+  .sidebar-section {
+    @apply p-4 border-b border-dark-200;
+  }
+
+  .sidebar-title {
+    @apply text-xs font-semibold text-dark-500 uppercase tracking-wider mb-3;
+  }
+
+  .tool-button {
+    @apply p-2 rounded-lg hover:bg-dark-100 transition-colors cursor-pointer flex items-center justify-center;
+  }
+
+  .tool-button.active {
+    @apply bg-primary-100 text-primary-600;
+  }
+
+  .panel {
+    @apply bg-white rounded-lg shadow-lg border border-dark-200;
+  }
+
+  .input {
+    @apply w-full px-3 py-2 rounded-lg border border-dark-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-all;
+  }
+
+  .btn {
+    @apply px-4 py-2 rounded-lg font-medium transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    @apply bg-primary-500 text-white hover:bg-primary-600 active:bg-primary-700;
+  }
+
+  .btn-secondary {
+    @apply bg-dark-100 text-dark-700 hover:bg-dark-200 active:bg-dark-300;
+  }
+
+  .btn-ghost {
+    @apply bg-transparent text-dark-600 hover:bg-dark-100;
+  }
+}
