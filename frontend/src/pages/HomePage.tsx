@@ -1,5 +1,6 @@
 import { useNavigate, Link } from 'react-router-dom';
 import { PRESET_FORMATS, type PresetFormat } from '@create/shared';
+import { useAuthStore } from '@/stores/authStore';
 import {
   Image,
   Video,
@@ -43,6 +44,7 @@ const projectTypes = [
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuthStore();
 
   const handleCreateProject = (type: string, format?: PresetFormat) => {
     const dimensions = format?.dimensions || { width: 1080, height: 1080 };
@@ -74,8 +76,22 @@ export default function HomePage() {
             <span className="text-xl font-semibold text-dark-900">Create</span>
           </div>
           <nav className="flex items-center gap-4">
-            <button className="btn btn-ghost">Mes projets</button>
-            <button className="btn btn-primary">Se connecter</button>
+            {isAuthenticated ? (
+              <>
+                <Link to="/projects" className="btn btn-ghost">
+                  Mes projets
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link to="/login" className="btn btn-ghost">
+                  Se connecter
+                </Link>
+                <Link to="/register" className="btn btn-primary">
+                  Créer un compte
+                </Link>
+              </>
+            )}
           </nav>
         </div>
       </header>

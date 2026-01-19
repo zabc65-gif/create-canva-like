@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEditorStore } from '@/stores/editorStore';
+import { useAuthStore } from '@/stores/authStore';
+import { api } from '@/services/api';
+import { useAutoSave } from '@/hooks/useAutoSave';
 import {
   ArrowLeft,
   Undo2,
@@ -16,6 +19,8 @@ import {
   Hand,
   Menu,
   X,
+  Save,
+  Cloud,
 } from 'lucide-react';
 import ExportModal from '@/components/editor/ExportModal';
 
@@ -31,14 +36,34 @@ export default function EditorHeader() {
   const navigate = useNavigate();
   const { project, mode, setMode, zoom, setZoom, undo, redo, historyIndex, history } =
     useEditorStore();
+  const { isAuthenticated } = useAuthStore();
   const [showExportModal, setShowExportModal] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  // Auto-save toutes les 30 secondes si authentifié
+  useAutoSave(30000);
 
   const canUndo = historyIndex > 0;
   const canRedo = historyIndex < history.length - 1;
 
   const handleZoomIn = () => setZoom(zoom + 0.1);
   const handleZoomOut = () => setZoom(zoom - 0.1);
+
+  const handleSaveManual = async () => {
+    if (!isAuthenticated || !project) return;
+
+    setSaving(true);
+    try {
+      await api.updateProject(project.id, project);
+      console.log('✅ Projet sauvegardé manuellement');
+    } catch (error) {
+      console.error('❌ Erreur sauvegarde:', error);
+      alert('Erreur lors de la sauvegarde du projet');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <header className="h-14 flex items-center px-2 md:px-4 gap-1 md:gap-2 bg-white border-b border-dark-200 justify-between min-w-0">
@@ -129,6 +154,21 @@ export default function EditorHeader() {
         </div>
 
         {/* Actions */}
+        {isAuthenticated && (
+          <button
+            onClick={handleSaveManual}
+            disabled={saving}
+            className="hidden md:flex btn btn-ghost items-center gap-2"
+            title="Sauvegarder"
+          >
+            {saving ? (
+              <Cloud className="w-4 h-4 animate-pulse" />
+            ) : (
+              <Save className="w-4 h-4" />
+            )}
+            <span className="hidden lg:inline">{saving ? 'Sauvegarde...' : 'Sauvegarder'}</span>
+          </button>
+        )}
         <button className="hidden md:flex btn btn-ghost items-center gap-2">
           <Share2 className="w-4 h-4" />
           <span className="hidden lg:inline">Partager</span>
