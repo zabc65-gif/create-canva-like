@@ -568,20 +568,27 @@ export default function EditorCanvas() {
       if (!obj) return;
 
       // Pour les images avec lockAspectRatio, forcer le scaling proportionnel
+      // UNIQUEMENT si on redimensionne par un coin (pas par un côté)
       const id = (obj as any).data?.id;
-      if (id) {
+      if (id && e.transform) {
         const currentProject = useEditorStore.getState().project;
         const element = currentProject?.elements.find(el => el.id === id);
 
         if (element?.type === 'image') {
           const imgEl = element as ImageElement;
           if (imgEl.lockAspectRatio ?? true) {
-            // Forcer le même scale sur X et Y
-            const scale = Math.max(obj.scaleX || 1, obj.scaleY || 1);
-            obj.set({
-              scaleX: scale,
-              scaleY: scale,
-            });
+            // Détecter si on redimensionne par un coin (corner) ou par un côté (side)
+            const corner = e.transform.corner;
+            const isCorner = corner && (corner === 'tl' || corner === 'tr' || corner === 'bl' || corner === 'br');
+
+            // Forcer le même scale SEULEMENT si on redimensionne par un coin
+            if (isCorner) {
+              const scale = Math.max(obj.scaleX || 1, obj.scaleY || 1);
+              obj.set({
+                scaleX: scale,
+                scaleY: scale,
+              });
+            }
           }
         }
       }
