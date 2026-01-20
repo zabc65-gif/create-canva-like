@@ -12,12 +12,14 @@ import {
   Minus,
   FileStack,
   Palette,
+  Video,
 } from 'lucide-react';
 import type { ShapeType, TextElement, ShapeElement } from '@create/shared';
 import { generatePrefixedId } from '@create/shared';
 import LayersPanel from '../editor/LayersPanel';
 import PhotoLibrary from '../editor/PhotoLibrary';
 import ImageUploader from '../editor/ImageUploader';
+import VideoUploader from '../editor/VideoUploader';
 import TemplatesGallery from '../editor/TemplatesGallery';
 
 const tabs = [
@@ -27,6 +29,7 @@ const tabs = [
   { id: 'layers', icon: FileStack, label: 'Calques' },
   { id: 'uploads', icon: Upload, label: 'Imports' },
   { id: 'photos', icon: ImageIcon, label: 'Photos' },
+  { id: 'videos', icon: Video, label: 'Vidéos' },
   { id: 'templates', icon: Layers, label: 'Templates' },
 ] as const;
 
@@ -241,6 +244,9 @@ export default function EditorSidebar() {
 
       case 'photos':
         return <PhotoLibrary />;
+
+      case 'videos':
+        return <VideoUploader />;
 
       case 'layers':
         return <LayersPanel />;

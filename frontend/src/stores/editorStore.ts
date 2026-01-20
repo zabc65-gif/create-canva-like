@@ -9,7 +9,7 @@ import type {
 import { generatePrefixedId } from '@create/shared';
 
 type EditorMode = 'select' | 'text' | 'shape' | 'draw' | 'pan';
-type EditorTab = 'elements' | 'text' | 'edit-image' | 'layers' | 'uploads' | 'photos' | 'templates';
+type EditorTab = 'elements' | 'text' | 'edit-image' | 'layers' | 'uploads' | 'photos' | 'videos' | 'templates';
 
 interface EditorState {
   // Projet actuel

@@ -1,7 +1,8 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { fabric } from 'fabric';
 import { useEditorStore } from '@/stores/editorStore';
-import type { CanvasElement, TextElement, ShapeElement, ImageElement, ImageFilters } from '@create/shared';
+import type { CanvasElement, TextElement, ShapeElement, ImageElement, VideoElement, ImageFilters } from '@create/shared';
+import VideoOverlay from './VideoOverlay';
 
 // Fonction pour appliquer les filtres Fabric.js à une image
 const applyFabricFilters = (img: fabric.Image, filters: ImageFilters) => {
@@ -213,6 +214,35 @@ export default function EditorCanvas() {
         // Pour les images, on utilise fabric.Image.fromURL
         // qui est asynchrone, donc on retourne null ici
         // et on gère ce cas séparément
+        break;
+      }
+
+      case 'video': {
+        // Pour les vidéos, on crée un rectangle placeholder
+        // La vraie vidéo sera rendue en overlay HTML5
+        const videoEl = element as VideoElement;
+        obj = new fabric.Rect({
+          left: videoEl.transform.x,
+          top: videoEl.transform.y,
+          width: videoEl.transform.width,
+          height: videoEl.transform.height,
+          fill: 'rgba(139, 92, 246, 0.1)', // Violet semi-transparent
+          stroke: '#8b5cf6',
+          strokeWidth: 2,
+          strokeDashArray: [5, 5],
+          angle: videoEl.transform.rotation,
+          scaleX: videoEl.transform.scaleX,
+          scaleY: videoEl.transform.scaleY,
+          opacity: videoEl.opacity,
+          visible: videoEl.visible,
+          selectable: true,
+          lockMovementX: videoEl.locked === true,
+          lockMovementY: videoEl.locked === true,
+          lockRotation: videoEl.locked === true,
+          lockScalingX: videoEl.locked === true,
+          lockScalingY: videoEl.locked === true,
+          hasControls: videoEl.locked !== true,
+        });
         break;
       }
     }
@@ -953,8 +983,9 @@ export default function EditorCanvas() {
   }, [selectedElementIds, project?.elements.length]);
 
   return (
-    <div ref={containerRef} className="canvas-area w-full h-full">
+    <div ref={containerRef} className="canvas-area w-full h-full" style={{ position: 'relative' }}>
       <canvas ref={canvasRef} />
+      <VideoOverlay canvas={fabricCanvasRef.current} project={project} />
     </div>
   );
 }

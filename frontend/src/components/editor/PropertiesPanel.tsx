@@ -23,8 +23,9 @@ import {
   AlignVerticalJustifyCenter,
   Maximize2,
 } from 'lucide-react';
-import type { TextElement, ShapeElement, ImageElement } from '@create/shared';
+import type { TextElement, ShapeElement, ImageElement, VideoElement } from '@create/shared';
 import ImageFiltersPanel from './ImageFilters';
+import VideoProperties from './VideoProperties';
 import { RotateCw, FlipHorizontal, FlipVertical } from 'lucide-react';
 
 export default function PropertiesPanel() {
@@ -454,6 +455,14 @@ export default function PropertiesPanel() {
       {element.type === 'image' && (
         <ImageProperties
           element={element as ImageElement}
+          onChange={(key, value) => updateElement(element.id, { [key]: value } as any)}
+        />
+      )}
+
+      {/* Propriétés spécifiques aux vidéos */}
+      {element.type === 'video' && (
+        <VideoProperties
+          element={element as VideoElement}
           onChange={(key, value) => updateElement(element.id, { [key]: value } as any)}
         />
       )}
