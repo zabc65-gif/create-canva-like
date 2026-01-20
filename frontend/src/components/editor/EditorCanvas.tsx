@@ -564,7 +564,29 @@ export default function EditorCanvas() {
 
     // Mise à jour en temps réel pendant le scaling
     canvas.on('object:scaling', (e: any) => {
-      if (e.target) updateTransform(e.target);
+      const obj = e.target;
+      if (!obj) return;
+
+      // Pour les images avec lockAspectRatio, forcer le scaling proportionnel
+      const id = (obj as any).data?.id;
+      if (id) {
+        const currentProject = useEditorStore.getState().project;
+        const element = currentProject?.elements.find(el => el.id === id);
+
+        if (element?.type === 'image') {
+          const imgEl = element as ImageElement;
+          if (imgEl.lockAspectRatio ?? true) {
+            // Forcer le même scale sur X et Y
+            const scale = Math.max(obj.scaleX || 1, obj.scaleY || 1);
+            obj.set({
+              scaleX: scale,
+              scaleY: scale,
+            });
+          }
+        }
+      }
+
+      updateTransform(obj);
     });
 
     // Mise à jour en temps réel pendant la rotation
@@ -720,6 +742,8 @@ export default function EditorCanvas() {
           }
 
           // Appliquer lockUniScaling pour le redimensionnement manuel
+          // lockUniScaling: false permet le scaling non-uniforme (déformation)
+          // lockUniScaling: true force le scaling uniforme (proportionnel)
           existingObj.set({
             lockUniScaling: imgEl.lockAspectRatio ?? true,
           });
