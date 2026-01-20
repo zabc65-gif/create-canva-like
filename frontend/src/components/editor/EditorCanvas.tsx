@@ -557,8 +557,12 @@ export default function EditorCanvas() {
       }
     };
 
+    // Stocker le ratio initial au début du scaling
+    let initialScaleRatio: number | null = null;
+
     // Événements de modification d'objet
     canvas.on('object:modified', (e: any) => {
+      initialScaleRatio = null; // Réinitialiser le ratio
       if (e.target) updateTransform(e.target);
     });
 
@@ -581,12 +585,19 @@ export default function EditorCanvas() {
             const corner = e.transform.corner;
             const isCorner = corner && (corner === 'tl' || corner === 'tr' || corner === 'bl' || corner === 'br');
 
-            // Forcer le même scale SEULEMENT si on redimensionne par un coin
+            // Forcer le scaling proportionnel SEULEMENT si on redimensionne par un coin
             if (isCorner) {
-              const scale = Math.max(obj.scaleX || 1, obj.scaleY || 1);
+              // Calculer le ratio actuel de l'image au début du scaling
+              if (initialScaleRatio === null) {
+                initialScaleRatio = (obj.scaleX || 1) / (obj.scaleY || 1);
+              }
+
+              // Appliquer le ratio actuel au scaling
+              const newScaleX = obj.scaleX || 1;
+              const newScaleY = newScaleX / initialScaleRatio;
+
               obj.set({
-                scaleX: scale,
-                scaleY: scale,
+                scaleY: newScaleY,
               });
             }
           }
