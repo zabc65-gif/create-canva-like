@@ -319,8 +319,8 @@ export default function EditorCanvas() {
         return;
       }
 
-      // Avec Alt sur PC ou mode pan, activer le pan
-      if (evt.altKey === true || mode === 'pan') {
+      // Avec Alt sur PC, activer le pan
+      if (evt.altKey === true) {
         isPanning = true;
         isDraggingObject = false;
         canvas.selection = false;

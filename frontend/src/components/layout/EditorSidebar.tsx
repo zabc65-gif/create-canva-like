@@ -21,7 +21,7 @@ import ImageUploader from '../editor/ImageUploader';
 import TemplatesGallery from '../editor/TemplatesGallery';
 
 const tabs = [
-  { id: 'canvas', icon: Palette, label: 'Canvas' },
+  { id: 'canvas', icon: Palette, label: 'Fond' },
   { id: 'elements', icon: LayoutGrid, label: 'Éléments' },
   { id: 'text', icon: Type, label: 'Texte' },
   { id: 'layers', icon: FileStack, label: 'Calques' },

@@ -65,11 +65,11 @@ export default function TemplatesGallery() {
       };
     });
 
-    // Créer un nouveau projet basé sur le template avec adaptation des dimensions
+    // Ajouter les nouveaux éléments aux éléments existants
     const newProject = {
       ...project,
-      // Garder les dimensions actuelles du projet
-      elements: newElements,
+      // Garder les dimensions actuelles du projet et ajouter les nouveaux éléments
+      elements: [...project.elements, ...newElements],
       updatedAt: new Date(),
     };
 
