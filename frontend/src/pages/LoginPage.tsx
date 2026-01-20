@@ -8,7 +8,7 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const setAuth = useAuthStore((state) => state.setAuth);
 
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -19,7 +19,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const result = await api.login(email, password);
+      const result = await api.login(identifier, password);
       setAuth(result.user, result.token);
       navigate('/projects');
     } catch (err: any) {
@@ -55,17 +55,17 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-dark-700 mb-1">
-              Email
+            <label htmlFor="identifier" className="block text-sm font-medium text-dark-700 mb-1">
+              Email ou Pseudo
             </label>
             <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              id="identifier"
+              type="text"
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
               required
               className="input"
-              placeholder="votre@email.com"
+              placeholder="votre@email.com ou votre pseudo"
             />
           </div>
 

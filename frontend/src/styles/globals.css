@@ -69,7 +69,7 @@ body {
   }
 
   .sidebar {
-    @apply w-72 bg-white border-r border-dark-200 flex flex-col;
+    @apply w-72 bg-white border-r border-dark-200 flex flex-col h-screen;
   }
 
   .sidebar-section {

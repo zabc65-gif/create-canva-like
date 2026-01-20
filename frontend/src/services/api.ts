@@ -74,6 +74,40 @@ class ApiService {
     return response.json();
   }
 
+  // PROFILE
+  async getProfile() {
+    const response = await fetch(`${API_URL}/user/profile`, {
+      headers: this.getHeaders(true),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Erreur lors de la récupération du profil');
+    }
+
+    return response.json();
+  }
+
+  async updateProfile(data: {
+    email: string;
+    username: string;
+    currentPassword?: string;
+    newPassword?: string;
+  }) {
+    const response = await fetch(`${API_URL}/user/profile`, {
+      method: 'PUT',
+      headers: this.getHeaders(true),
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Erreur lors de la mise à jour du profil');
+    }
+
+    return response.json();
+  }
+
   // PROJECTS
   async getProjects() {
     const response = await fetch(`${API_URL}/user/projects`, {

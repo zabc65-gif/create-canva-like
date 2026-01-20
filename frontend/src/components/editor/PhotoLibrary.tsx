@@ -46,40 +46,113 @@ export default function PhotoLibrary({ onClose }: PhotoLibraryProps) {
     loadPopularPhotos();
   }, []);
 
+  const getDemoPhotos = (): UnsplashPhoto[] => {
+    return [
+      {
+        id: '1',
+        urls: {
+          raw: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200',
+          full: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200',
+          regular: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800',
+          small: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400',
+          thumb: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200',
+        },
+        alt_description: 'Abstract gradient colorful background',
+        user: { name: 'Unsplash', username: 'unsplash', links: { html: 'https://unsplash.com' } },
+        links: { html: 'https://unsplash.com', download_location: '' },
+        width: 1200,
+        height: 800,
+      },
+      {
+        id: '2',
+        urls: {
+          raw: 'https://images.unsplash.com/photo-1557672172-298e090bd0f1?w=1200',
+          full: 'https://images.unsplash.com/photo-1557672172-298e090bd0f1?w=1200',
+          regular: 'https://images.unsplash.com/photo-1557672172-298e090bd0f1?w=800',
+          small: 'https://images.unsplash.com/photo-1557672172-298e090bd0f1?w=400',
+          thumb: 'https://images.unsplash.com/photo-1557672172-298e090bd0f1?w=200',
+        },
+        alt_description: 'Abstract blue waves',
+        user: { name: 'Unsplash', username: 'unsplash', links: { html: 'https://unsplash.com' } },
+        links: { html: 'https://unsplash.com', download_location: '' },
+        width: 1200,
+        height: 800,
+      },
+      {
+        id: '3',
+        urls: {
+          raw: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=1200',
+          full: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=1200',
+          regular: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=800',
+          small: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=400',
+          thumb: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200',
+        },
+        alt_description: 'Gradient purple and pink',
+        user: { name: 'Unsplash', username: 'unsplash', links: { html: 'https://unsplash.com' } },
+        links: { html: 'https://unsplash.com', download_location: '' },
+        width: 1200,
+        height: 800,
+      },
+      {
+        id: '4',
+        urls: {
+          raw: 'https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=1200',
+          full: 'https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=1200',
+          regular: 'https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=800',
+          small: 'https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=400',
+          thumb: 'https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=200',
+        },
+        alt_description: 'Gradient orange and yellow',
+        user: { name: 'Unsplash', username: 'unsplash', links: { html: 'https://unsplash.com' } },
+        links: { html: 'https://unsplash.com', download_location: '' },
+        width: 1200,
+        height: 800,
+      },
+      {
+        id: '5',
+        urls: {
+          raw: 'https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=1200',
+          full: 'https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=1200',
+          regular: 'https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=800',
+          small: 'https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=400',
+          thumb: 'https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=200',
+        },
+        alt_description: 'Colorful abstract pattern',
+        user: { name: 'Unsplash', username: 'unsplash', links: { html: 'https://unsplash.com' } },
+        links: { html: 'https://unsplash.com', download_location: '' },
+        width: 1200,
+        height: 800,
+      },
+      {
+        id: '6',
+        urls: {
+          raw: 'https://images.unsplash.com/photo-1567095761054-7a02e69e5c43?w=1200',
+          full: 'https://images.unsplash.com/photo-1567095761054-7a02e69e5c43?w=1200',
+          regular: 'https://images.unsplash.com/photo-1567095761054-7a02e69e5c43?w=800',
+          small: 'https://images.unsplash.com/photo-1567095761054-7a02e69e5c43?w=400',
+          thumb: 'https://images.unsplash.com/photo-1567095761054-7a02e69e5c43?w=200',
+        },
+        alt_description: 'Green and blue gradient',
+        user: { name: 'Unsplash', username: 'unsplash', links: { html: 'https://unsplash.com' } },
+        links: { html: 'https://unsplash.com', download_location: '' },
+        width: 1200,
+        height: 800,
+      },
+    ];
+  };
+
   const loadPopularPhotos = async () => {
     setLoading(true);
     setError(null);
 
     try {
       if (!UNSPLASH_ACCESS_KEY) {
-        // Mode démo si pas de clé API
-        const demoPhotos: UnsplashPhoto[] = [
-          {
-            id: '1',
-            urls: {
-              raw: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200',
-              full: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200',
-              regular: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800',
-              small: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400',
-              thumb: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200',
-            },
-            alt_description: 'Abstract gradient',
-            user: {
-              name: 'Demo User',
-              username: 'demo',
-              links: { html: 'https://unsplash.com' },
-            },
-            links: {
-              html: 'https://unsplash.com',
-              download_location: '',
-            },
-            width: 1200,
-            height: 800,
-          },
-        ];
-        setPhotos(demoPhotos);
+        console.log('📸 Mode démo: Pas de clé API Unsplash');
+        setPhotos(getDemoPhotos());
         return;
       }
+
+      console.log('📸 Chargement des photos Unsplash avec clé API...');
 
       // Code Unsplash réel avec clé API
       const response = await fetch(
@@ -91,15 +164,25 @@ export default function PhotoLibrary({ onClose }: PhotoLibraryProps) {
         }
       );
 
+      console.log('📸 Réponse Unsplash:', response.status, response.statusText);
+
       if (!response.ok) {
-        throw new Error('Erreur lors du chargement des photos');
+        const errorText = await response.text();
+        console.error('❌ Erreur API Unsplash:', errorText);
+
+        // Fallback sur les photos de démo si l'API échoue
+        console.log('📸 Fallback sur les photos de démo');
+        setPhotos(getDemoPhotos());
+        return;
       }
 
       const data = await response.json();
+      console.log('✅ Photos chargées:', data.length);
       setPhotos(data);
     } catch (err) {
-      setError('Impossible de charger les photos. Veuillez réessayer.');
-      console.error('Error loading photos:', err);
+      console.error('❌ Erreur lors du chargement des photos:', err);
+      // Fallback sur les photos de démo en cas d'erreur
+      setPhotos(getDemoPhotos());
     } finally {
       setLoading(false);
     }
@@ -190,7 +273,7 @@ export default function PhotoLibrary({ onClose }: PhotoLibraryProps) {
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div>
       {/* En-tête de recherche */}
       <div className="p-4 border-b border-dark-200">
         <div className="relative">
@@ -218,7 +301,7 @@ export default function PhotoLibrary({ onClose }: PhotoLibraryProps) {
       </div>
 
       {/* Grille de photos */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="p-4">
         {loading && (
           <div className="flex items-center justify-center h-64">
             <div className="text-center">

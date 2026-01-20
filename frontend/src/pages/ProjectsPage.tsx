@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
 import { useEditorStore } from '@/stores/editorStore';
 import { api } from '@/services/api';
-import { Plus, LogOut, Trash2, Clock, FileText } from 'lucide-react';
+import { Plus, LogOut, Trash2, Clock, FileText, Settings, Home, Edit2 } from 'lucide-react';
 import type { Project } from '@create/shared';
 
 interface ProjectListItem {
@@ -23,6 +23,8 @@ export default function ProjectsPage() {
   const [projects, setProjects] = useState<ProjectListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [renamingProjectId, setRenamingProjectId] = useState<string | null>(null);
+  const [newName, setNewName] = useState('');
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -73,6 +75,47 @@ export default function ProjectsPage() {
     }
   };
 
+  const handleStartRename = (projectId: string, currentName: string) => {
+    setRenamingProjectId(projectId);
+    setNewName(currentName);
+  };
+
+  const handleCancelRename = () => {
+    setRenamingProjectId(null);
+    setNewName('');
+  };
+
+  const handleRenameProject = async (projectId: string) => {
+    if (!newName.trim()) {
+      alert('Le nom du projet ne peut pas être vide');
+      return;
+    }
+
+    try {
+      const projectToRename = projects.find((p) => p.id === projectId);
+      if (!projectToRename) return;
+
+      const fullProject = await api.getProject(projectId);
+      const updatedProject = {
+        ...fullProject.project,
+        name: newName.trim(),
+      };
+
+      await api.updateProject(projectId, updatedProject);
+
+      setProjects(
+        projects.map((p) =>
+          p.id === projectId ? { ...p, name: newName.trim() } : p
+        )
+      );
+
+      setRenamingProjectId(null);
+      setNewName('');
+    } catch (err: any) {
+      alert(err.message || 'Erreur lors du renommage du projet');
+    }
+  };
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('fr-FR', {
@@ -99,6 +142,12 @@ export default function ProjectsPage() {
               <p className="text-sm font-medium text-dark-900">{user?.username}</p>
               <p className="text-xs text-dark-500">{user?.email}</p>
             </div>
+            <Link to="/" className="btn btn-ghost" title="Retour à l'accueil">
+              <Home className="w-5 h-5" />
+            </Link>
+            <Link to="/account" className="btn btn-ghost" title="Paramètres du compte">
+              <Settings className="w-5 h-5" />
+            </Link>
             <button onClick={handleLogout} className="btn btn-ghost" title="Déconnexion">
               <LogOut className="w-5 h-5" />
             </button>
@@ -167,14 +216,56 @@ export default function ProjectsPage() {
 
                 {/* Info */}
                 <div className="p-4">
-                  <button
-                    onClick={() => handleOpenProject(project.id)}
-                    className="text-left w-full"
-                  >
-                    <h3 className="font-semibold text-dark-900 mb-1 group-hover:text-primary-600 transition-colors">
-                      {project.name}
-                    </h3>
-                  </button>
+                  {renamingProjectId === project.id ? (
+                    <div className="mb-3">
+                      <input
+                        type="text"
+                        value={newName}
+                        onChange={(e) => setNewName(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            handleRenameProject(project.id);
+                          } else if (e.key === 'Escape') {
+                            handleCancelRename();
+                          }
+                        }}
+                        className="input w-full text-sm mb-2"
+                        autoFocus
+                      />
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleRenameProject(project.id)}
+                          className="btn btn-primary flex-1 text-xs py-1"
+                        >
+                          Valider
+                        </button>
+                        <button
+                          onClick={handleCancelRename}
+                          className="btn btn-ghost flex-1 text-xs py-1"
+                        >
+                          Annuler
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-start justify-between mb-1">
+                      <button
+                        onClick={() => handleOpenProject(project.id)}
+                        className="text-left flex-1"
+                      >
+                        <h3 className="font-semibold text-dark-900 group-hover:text-primary-600 transition-colors">
+                          {project.name}
+                        </h3>
+                      </button>
+                      <button
+                        onClick={() => handleStartRename(project.id, project.name)}
+                        className="text-dark-400 hover:text-primary-600 p-1 ml-2"
+                        title="Renommer"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
 
                   <div className="flex items-center gap-1 text-xs text-dark-500 mb-3">
                     <Clock className="w-3 h-3" />

@@ -69,14 +69,18 @@ export default function EditorCanvas() {
   const containerRef = useRef<HTMLDivElement>(null);
   const fabricCanvasRef = useRef<fabric.Canvas | null>(null);
   const isUpdatingFromStoreRef = useRef(false);
+  const isUpdatingSelectionFromStoreRef = useRef(false);
 
   const {
     project,
     zoom,
+    setZoom,
     setCanvas,
     selectElement,
     deselectAll,
     updateElement,
+    selectedElementIds,
+    selectElements,
   } = useEditorStore();
 
   // Créer un objet Fabric à partir d'un élément
@@ -241,10 +245,10 @@ export default function EditorCanvas() {
     const scaleY = (containerHeight - padding * 2) / project.dimensions.height;
     const initialZoom = Math.min(scaleX, scaleY, 1);
 
-    // Créer le "workboard" (zone de travail)
+    // Créer le "workboard" (zone de travail) à la position (0, 0)
     const workboard = new fabric.Rect({
-      left: (containerWidth - project.dimensions.width * initialZoom) / 2,
-      top: (containerHeight - project.dimensions.height * initialZoom) / 2,
+      left: 0,
+      top: 0,
       width: project.dimensions.width,
       height: project.dimensions.height,
       fill: project.backgroundColor,
@@ -260,8 +264,13 @@ export default function EditorCanvas() {
     workboard.set('data', { isWorkboard: true });
     canvas.add(workboard);
 
-    // Appliquer le zoom initial
-    canvas.setZoom(initialZoom);
+    // Centrer le viewport sur le workboard
+    const offsetX = (containerWidth - project.dimensions.width * initialZoom) / 2;
+    const offsetY = (containerHeight - project.dimensions.height * initialZoom) / 2;
+    canvas.setViewportTransform([
+      initialZoom, 0, 0, initialZoom,
+      offsetX, offsetY
+    ]);
 
     // Support tactile: pan et zoom
     let isPanning = false;
@@ -412,22 +421,48 @@ export default function EditorCanvas() {
 
     // Événements de sélection
     canvas.on('selection:created', (e: any) => {
-      const selected = e.selected?.[0];
-      if (selected) {
-        const id = (selected as any).data?.id;
-        if (id) selectElement(id);
+      // Ignorer si la sélection vient du store
+      if (isUpdatingSelectionFromStoreRef.current) {
+        return;
+      }
+
+      // Gérer les sélections multiples
+      if (e.selected && e.selected.length > 0) {
+        const ids = e.selected
+          .map((obj: any) => obj.data?.id)
+          .filter((id: string | undefined) => id !== undefined);
+
+        if (ids.length > 0) {
+          // Utiliser selectElements pour les sélections multiples
+          selectElements(ids);
+        }
       }
     });
 
     canvas.on('selection:updated', (e: any) => {
-      const selected = e.selected?.[0];
-      if (selected) {
-        const id = (selected as any).data?.id;
-        if (id) selectElement(id);
+      // Ignorer si la sélection vient du store
+      if (isUpdatingSelectionFromStoreRef.current) {
+        return;
+      }
+
+      // Gérer les sélections multiples
+      if (e.selected && e.selected.length > 0) {
+        const ids = e.selected
+          .map((obj: any) => obj.data?.id)
+          .filter((id: string | undefined) => id !== undefined);
+
+        if (ids.length > 0) {
+          // Utiliser selectElements pour les sélections multiples
+          selectElements(ids);
+        }
       }
     });
 
     canvas.on('selection:cleared', () => {
+      // Ignorer si la sélection vient du store
+      if (isUpdatingSelectionFromStoreRef.current) {
+        return;
+      }
       deselectAll();
     });
 
@@ -773,6 +808,72 @@ export default function EditorCanvas() {
     canvas.setZoom(zoom);
     canvas.renderAll();
   }, [zoom]);
+
+  // Mettre à jour la couleur de fond du workboard
+  useEffect(() => {
+    const canvas = fabricCanvasRef.current;
+    if (!canvas || !project) return;
+
+    // Trouver le workboard
+    const workboard = canvas.getObjects().find((obj: any) => obj.data?.isWorkboard);
+    if (workboard) {
+      workboard.set('fill', project.backgroundColor);
+      canvas.renderAll();
+    }
+  }, [project?.backgroundColor]);
+
+  // Synchroniser la sélection du store vers le canvas
+  useEffect(() => {
+    const canvas = fabricCanvasRef.current;
+    if (!canvas || !project) return;
+
+    // Double requestAnimationFrame pour s'assurer que les objets sont complètement rendus
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        // Activer le flag pour ignorer les events canvas pendant la mise à jour
+        isUpdatingSelectionFromStoreRef.current = true;
+
+        // Trouver les objets Fabric correspondant aux IDs sélectionnés
+        const objectsToSelect: fabric.Object[] = [];
+
+        canvas.getObjects().forEach((obj: any) => {
+          if (obj.data?.id && selectedElementIds.includes(obj.data.id)) {
+            objectsToSelect.push(obj);
+          }
+        });
+
+        console.log('🎯 Selection sync:', {
+          selectedElementIds,
+          canvasObjects: canvas.getObjects().length,
+          objectsFound: objectsToSelect.length,
+          allObjectIds: canvas.getObjects().map((obj: any) => obj.data?.id).filter(Boolean)
+        });
+
+        if (objectsToSelect.length === 0) {
+          // Déselectionner tout si aucun élément sélectionné dans le store
+          if (selectedElementIds.length === 0) {
+            canvas.discardActiveObject();
+          }
+        } else if (objectsToSelect.length === 1) {
+          // Sélectionner un seul objet
+          canvas.setActiveObject(objectsToSelect[0]);
+        } else {
+          // Sélection multiple
+          const selection = new fabric.ActiveSelection(objectsToSelect, {
+            canvas: canvas,
+          });
+          canvas.setActiveObject(selection);
+        }
+
+        canvas.requestRenderAll();
+
+        // Désactiver le flag après un court délai
+        setTimeout(() => {
+          isUpdatingSelectionFromStoreRef.current = false;
+        }, 100);
+      });
+    });
+  }, [selectedElementIds, project?.elements.length]);
 
   return (
     <div ref={containerRef} className="canvas-area w-full h-full">

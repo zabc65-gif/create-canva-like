@@ -11,14 +11,17 @@ import {
   Star,
   Minus,
   FileStack,
+  Palette,
 } from 'lucide-react';
 import type { ShapeType, TextElement, ShapeElement } from '@create/shared';
 import { generatePrefixedId } from '@create/shared';
 import LayersPanel from '../editor/LayersPanel';
 import PhotoLibrary from '../editor/PhotoLibrary';
 import ImageUploader from '../editor/ImageUploader';
+import TemplatesGallery from '../editor/TemplatesGallery';
 
 const tabs = [
+  { id: 'canvas', icon: Palette, label: 'Canvas' },
   { id: 'elements', icon: LayoutGrid, label: 'Éléments' },
   { id: 'text', icon: Type, label: 'Texte' },
   { id: 'layers', icon: FileStack, label: 'Calques' },
@@ -113,6 +116,77 @@ export default function EditorSidebar() {
 
   const renderTabContent = () => {
     switch (activeTab) {
+      case 'canvas':
+        return (
+          <div className="p-4">
+            <div className="sidebar-section space-y-4">
+              <h3 className="sidebar-title">Propriétés du canvas</h3>
+
+              {/* Couleur de fond */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-dark-700">Couleur de fond</label>
+                <input
+                  type="color"
+                  value={project?.backgroundColor || '#ffffff'}
+                  onChange={(e) => {
+                    if (project) {
+                      const updatedProject = {
+                        ...project,
+                        backgroundColor: e.target.value,
+                      };
+                      useEditorStore.setState({ project: updatedProject });
+                    }
+                  }}
+                  className="w-full h-12 rounded border border-dark-300 cursor-pointer"
+                />
+                <input
+                  type="text"
+                  value={project?.backgroundColor || '#ffffff'}
+                  onChange={(e) => {
+                    if (project) {
+                      const updatedProject = {
+                        ...project,
+                        backgroundColor: e.target.value,
+                      };
+                      useEditorStore.setState({ project: updatedProject });
+                    }
+                  }}
+                  className="w-full px-3 py-2 border border-dark-300 rounded-lg font-mono text-sm"
+                  placeholder="#ffffff"
+                />
+              </div>
+
+              {/* Dimensions */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-dark-700">Dimensions</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-xs text-dark-500">Largeur</label>
+                    <input
+                      type="number"
+                      value={project?.dimensions.width || 0}
+                      readOnly
+                      className="w-full px-3 py-2 border border-dark-300 rounded-lg bg-dark-100 cursor-not-allowed text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-dark-500">Hauteur</label>
+                    <input
+                      type="number"
+                      value={project?.dimensions.height || 0}
+                      readOnly
+                      className="w-full px-3 py-2 border border-dark-300 rounded-lg bg-dark-100 cursor-not-allowed text-sm"
+                    />
+                  </div>
+                </div>
+                <p className="text-xs text-dark-500">
+                  Les dimensions ne peuvent pas être modifiées après la création du projet.
+                </p>
+              </div>
+            </div>
+          </div>
+        );
+
       case 'elements':
         return (
           <div className="p-4">
@@ -172,16 +246,7 @@ export default function EditorSidebar() {
         return <LayersPanel />;
 
       case 'templates':
-        return (
-          <div className="p-4">
-            <div className="sidebar-section">
-              <h3 className="sidebar-title">Templates</h3>
-              <p className="text-sm text-dark-500">
-                Bientôt disponible : des templates prêts à l'emploi pour démarrer rapidement.
-              </p>
-            </div>
-          </div>
-        );
+        return <TemplatesGallery />;
 
       default:
         return null;
@@ -191,7 +256,7 @@ export default function EditorSidebar() {
   return (
     <aside className="sidebar">
       {/* Tabs */}
-      <div className="flex flex-wrap border-b border-dark-200">
+      <div className="flex flex-wrap border-b border-dark-200 flex-shrink-0">
         {tabs.map((tab) => (
           <button
             key={tab.id}

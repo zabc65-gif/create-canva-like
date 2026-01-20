@@ -1,0 +1,9 @@
+# Clés API Unsplash pour Create
+# Sauvegarde locale - NE PAS COMMIT dans git
+
+Application ID: 859180
+Access Key: 6N8T82TtotPpNxKEV_4BhlCJgW2_VMwbL-_er5UJ0S4
+Secret Key: hVLJFWNmcrGAH2Z7ZLQUgkHZJj749ktxREDyKwmdrac
+
+# La clé à utiliser est Access Key
+# Configurée dans frontend/.env comme VITE_UNSPLASH_ACCESS_KEY

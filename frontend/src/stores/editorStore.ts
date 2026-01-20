@@ -60,6 +60,7 @@ interface EditorState {
 
   // Sélection
   selectElement: (id: string, addToSelection?: boolean) => void;
+  selectElements: (ids: string[]) => void;
   deselectAll: () => void;
 
   // Historique
@@ -221,6 +222,10 @@ export const useEditorStore = create<EditorState>()(
     } else {
       set({ selectedElementIds: [id] });
     }
+  },
+
+  selectElements: (ids) => {
+    set({ selectedElementIds: ids });
   },
 
   deselectAll: () => set({ selectedElementIds: [] }),

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { useEditorStore } from '@/stores/editorStore';
 import { useAuthStore } from '@/stores/authStore';
 import { api } from '@/services/api';
@@ -21,6 +21,7 @@ import {
   X,
   Save,
   Cloud,
+  FolderOpen,
 } from 'lucide-react';
 import ExportModal from '@/components/editor/ExportModal';
 
@@ -34,29 +35,167 @@ const tools = [
 
 export default function EditorHeader() {
   const navigate = useNavigate();
-  const { project, mode, setMode, zoom, setZoom, undo, redo, historyIndex, history } =
+  const { project, mode, setMode, zoom, setZoom, undo, redo, historyIndex, history, setProject } =
     useEditorStore();
   const { isAuthenticated } = useAuthStore();
   const [showExportModal, setShowExportModal] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [saving, setSaving] = useState(false);
+  const lastSavedProjectRef = useRef<string>('');
+  const hasUnsavedChanges = useRef(false);
 
-  // Auto-save toutes les 30 secondes si authentifié
-  useAutoSave(30000);
-
+  // Définir canUndo et canRedo au début pour qu'ils soient disponibles partout
   const canUndo = historyIndex > 0;
   const canRedo = historyIndex < history.length - 1;
 
+  // Auto-save toutes les 30 secondes si authentifié
+  useAutoSave(30000, () => {
+    // Marquer comme sauvegardé après l'auto-save
+    if (project) {
+      lastSavedProjectRef.current = JSON.stringify(project);
+      hasUnsavedChanges.current = false;
+    }
+  });
+
+  // Suivre les changements non sauvegardés
+  useEffect(() => {
+    if (!project) return;
+
+    const currentProjectJson = JSON.stringify(project);
+    if (lastSavedProjectRef.current === '') {
+      lastSavedProjectRef.current = currentProjectJson;
+      hasUnsavedChanges.current = false;
+    } else if (currentProjectJson !== lastSavedProjectRef.current) {
+      hasUnsavedChanges.current = true;
+    }
+  }, [project]);
+
+  // Avertissement avant de quitter la page si changements non sauvegardés
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges.current) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, []);
+
+  // Raccourcis clavier pour undo/redo
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Cmd+Z (Mac) ou Ctrl+Z (Windows/Linux) pour undo
+      if ((e.metaKey || e.ctrlKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        if (canUndo) {
+          undo();
+        }
+      }
+      // Cmd+Shift+Z (Mac) ou Ctrl+Shift+Z (Windows/Linux) pour redo
+      else if ((e.metaKey || e.ctrlKey) && e.key === 'z' && e.shiftKey) {
+        e.preventDefault();
+        if (canRedo) {
+          redo();
+        }
+      }
+      // Cmd+Y (alternative pour redo sur Windows)
+      else if ((e.metaKey || e.ctrlKey) && e.key === 'y') {
+        e.preventDefault();
+        if (canRedo) {
+          redo();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [canUndo, canRedo, undo, redo]);
+
+  // Fonction pour naviguer avec confirmation
+  const handleNavigateWithConfirm = (path: string) => {
+    if (hasUnsavedChanges.current) {
+      const confirmed = window.confirm(
+        'Vous avez des modifications non sauvegardées. Voulez-vous vraiment quitter ?'
+      );
+      if (!confirmed) return;
+    }
+    navigate(path);
+  };
+
   const handleZoomIn = () => setZoom(zoom + 0.1);
   const handleZoomOut = () => setZoom(zoom - 0.1);
+
+  const handleNameChange = (newName: string) => {
+    if (!project) return;
+    const updatedProject = {
+      ...project,
+      name: newName,
+      updatedAt: new Date(),
+    };
+    setProject(updatedProject);
+  };
+
+  const generateUniqueProjectName = async (baseName: string): Promise<string> => {
+    try {
+      const result = await api.getProjects();
+      const existingNames = result.projects.map((p: any) => p.name);
+
+      if (!existingNames.includes(baseName)) {
+        return baseName;
+      }
+
+      let counter = 1;
+      let newName = `${baseName} ${counter}`;
+
+      while (existingNames.includes(newName)) {
+        counter++;
+        newName = `${baseName} ${counter}`;
+      }
+
+      return newName;
+    } catch (error) {
+      console.error('Erreur lors de la génération du nom unique:', error);
+      return baseName;
+    }
+  };
 
   const handleSaveManual = async () => {
     if (!isAuthenticated || !project) return;
 
     setSaving(true);
     try {
-      await api.updateProject(project.id, project);
-      console.log('✅ Projet sauvegardé manuellement');
+      let projectToSave = project;
+
+      // Essayer d'abord de mettre à jour, si échec alors créer
+      try {
+        await api.updateProject(project.id, project);
+        console.log('✅ Projet sauvegardé manuellement');
+      } catch (updateError: any) {
+        // Si le projet n'existe pas, le créer
+        if (updateError.message?.includes('non trouvé') || updateError.message?.includes('404')) {
+          // Générer un nom unique si c'est "Nouveau projet"
+          if (project.name === 'Nouveau projet' || project.name.startsWith('Nouveau projet')) {
+            const uniqueName = await generateUniqueProjectName('Nouveau projet');
+            projectToSave = {
+              ...project,
+              name: uniqueName,
+              updatedAt: new Date(),
+            };
+            setProject(projectToSave);
+          }
+
+          await api.createProject(projectToSave);
+          console.log('✅ Projet créé sur le serveur:', projectToSave.name);
+        } else {
+          throw updateError;
+        }
+      }
+
+      // Marquer comme sauvegardé
+      lastSavedProjectRef.current = JSON.stringify(projectToSave);
+      hasUnsavedChanges.current = false;
     } catch (error) {
       console.error('❌ Erreur sauvegarde:', error);
       alert('Erreur lors de la sauvegarde du projet');
@@ -70,12 +209,26 @@ export default function EditorHeader() {
       {/* Gauche - Navigation et nom du projet */}
       <div className="flex items-center gap-1 md:gap-2 min-w-0 flex-shrink">
         <button
-          onClick={() => navigate('/')}
+          onClick={() => handleNavigateWithConfirm('/')}
           className="tool-button flex-shrink-0 p-1.5 md:p-2"
           title="Retour à l'accueil"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
+
+        {isAuthenticated && (
+          <Link
+            to="/projects"
+            onClick={(e) => {
+              e.preventDefault();
+              handleNavigateWithConfirm('/projects');
+            }}
+            className="hidden sm:flex tool-button flex-shrink-0 p-1.5 md:p-2"
+            title="Mes projets"
+          >
+            <FolderOpen className="w-5 h-5" />
+          </Link>
+        )}
 
         <div className="flex items-center gap-2 min-w-0">
           <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -85,7 +238,8 @@ export default function EditorHeader() {
             <input
               type="text"
               value={project?.name || ''}
-              className="text-sm font-medium text-dark-900 bg-transparent border-none outline-none focus:ring-0 w-32 lg:w-48"
+              onChange={(e) => handleNameChange(e.target.value)}
+              className="text-sm font-medium text-dark-900 bg-transparent border-none outline-none focus:ring-0 w-32 lg:w-48 hover:bg-dark-50 rounded px-1 transition-colors"
               placeholder="Nom du projet"
             />
             <p className="text-xs text-dark-400 whitespace-nowrap overflow-hidden text-ellipsis">

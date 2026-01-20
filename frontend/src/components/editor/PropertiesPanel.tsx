@@ -19,6 +19,9 @@ import {
   ArrowDown,
   ChevronsUp,
   ChevronsDown,
+  AlignHorizontalJustifyCenter,
+  AlignVerticalJustifyCenter,
+  Maximize2,
 } from 'lucide-react';
 import type { TextElement, ShapeElement, ImageElement } from '@create/shared';
 import ImageFiltersPanel from './ImageFilters';
@@ -35,6 +38,7 @@ export default function PropertiesPanel() {
     sendBackward,
     project,
     selectedElementIds,
+    setProject,
   } = useEditorStore();
 
   // State local pour forcer le re-render
@@ -62,7 +66,79 @@ export default function PropertiesPanel() {
     setRenderCount(prev => prev + 1);
   }, [project?.elements, element?.transform.x, element?.transform.y, element?.transform.width, element?.transform.height, element?.transform.rotation]);
 
-  if (!element) return null;
+  // Si aucun élément n'est sélectionné, afficher les propriétés du canvas
+  if (!element) {
+    return (
+      <div className="p-3 md:p-4 space-y-3 md:space-y-6">
+        {/* Poignée de déplacement mobile */}
+        <div className="md:hidden flex justify-center -mt-1 mb-2">
+          <div className="w-12 h-1 bg-dark-300 rounded-full"></div>
+        </div>
+
+        <h3 className="text-lg font-semibold text-dark-800">Propriétés du canvas</h3>
+
+        {/* Couleur de fond */}
+        <div className="space-y-3">
+          <h4 className="sidebar-title">Couleur de fond</h4>
+          <input
+            type="color"
+            value={project?.backgroundColor || '#ffffff'}
+            onChange={(e) => {
+              if (project) {
+                setProject({
+                  ...project,
+                  backgroundColor: e.target.value,
+                });
+              }
+            }}
+            className="w-full h-10 rounded border border-dark-300 cursor-pointer"
+          />
+          <input
+            type="text"
+            value={project?.backgroundColor || '#ffffff'}
+            onChange={(e) => {
+              if (project) {
+                setProject({
+                  ...project,
+                  backgroundColor: e.target.value,
+                });
+              }
+            }}
+            className="input text-sm font-mono"
+            placeholder="#ffffff"
+          />
+        </div>
+
+        {/* Dimensions du canvas */}
+        <div className="space-y-3">
+          <h4 className="sidebar-title">Dimensions</h4>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="text-xs text-dark-500">Largeur</label>
+              <input
+                type="number"
+                value={project?.dimensions.width || 0}
+                readOnly
+                className="input text-sm bg-dark-100 cursor-not-allowed"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-dark-500">Hauteur</label>
+              <input
+                type="number"
+                value={project?.dimensions.height || 0}
+                readOnly
+                className="input text-sm bg-dark-100 cursor-not-allowed"
+              />
+            </div>
+          </div>
+          <p className="text-xs text-dark-500">
+            Les dimensions du canvas ne peuvent pas être modifiées après la création.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const handleChange = (key: string, value: unknown) => {
     updateElement(element.id, { [key]: value } as any);
@@ -102,6 +178,42 @@ export default function PropertiesPanel() {
         },
       } as any);
     }
+  };
+
+  // Fonctions de centrage
+  const centerHorizontally = () => {
+    if (!project) return;
+    const newX = (project.dimensions.width - element.transform.width) / 2;
+    updateElement(element.id, {
+      transform: {
+        ...element.transform,
+        x: newX,
+      },
+    } as any);
+  };
+
+  const centerVertically = () => {
+    if (!project) return;
+    const newY = (project.dimensions.height - element.transform.height) / 2;
+    updateElement(element.id, {
+      transform: {
+        ...element.transform,
+        y: newY,
+      },
+    } as any);
+  };
+
+  const centerBoth = () => {
+    if (!project) return;
+    const newX = (project.dimensions.width - element.transform.width) / 2;
+    const newY = (project.dimensions.height - element.transform.height) / 2;
+    updateElement(element.id, {
+      transform: {
+        ...element.transform,
+        x: newX,
+        y: newY,
+      },
+    } as any);
   };
 
   return (
@@ -159,17 +271,15 @@ export default function PropertiesPanel() {
         <div className="flex items-center justify-between">
           <h4 className="sidebar-title">Position & Taille</h4>
           {element.type === 'image' && (
-            <button
-              onClick={() => setLockAspectRatio(!lockAspectRatio)}
-              className={`tool-button ${lockAspectRatio ? 'bg-primary-100 text-primary-600' : ''}`}
-              title={lockAspectRatio ? 'Ratio verrouillé' : 'Ratio déverrouillé'}
-            >
-              {lockAspectRatio ? (
-                <Link className="w-4 h-4" />
-              ) : (
-                <Unlink className="w-4 h-4" />
-              )}
-            </button>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={lockAspectRatio}
+                onChange={(e) => setLockAspectRatio(e.target.checked)}
+                className="w-4 h-4 rounded border-dark-300 text-primary-600 focus:ring-primary-500"
+              />
+              <span className="text-xs text-dark-600">Conserver les proportions</span>
+            </label>
           )}
         </div>
         <div className="grid grid-cols-2 gap-2">
@@ -210,6 +320,35 @@ export default function PropertiesPanel() {
             />
           </div>
         </div>
+
+        {/* Boutons de centrage */}
+        <div className="flex gap-2">
+          <button
+            onClick={centerHorizontally}
+            className="flex-1 btn-secondary text-xs py-2 flex items-center justify-center gap-1"
+            title="Centrer horizontalement"
+          >
+            <AlignHorizontalJustifyCenter size={14} />
+            <span className="hidden sm:inline">Centrer H</span>
+          </button>
+          <button
+            onClick={centerVertically}
+            className="flex-1 btn-secondary text-xs py-2 flex items-center justify-center gap-1"
+            title="Centrer verticalement"
+          >
+            <AlignVerticalJustifyCenter size={14} />
+            <span className="hidden sm:inline">Centrer V</span>
+          </button>
+          <button
+            onClick={centerBoth}
+            className="flex-1 btn-secondary text-xs py-2 flex items-center justify-center gap-1"
+            title="Centrer complètement"
+          >
+            <Maximize2 size={14} />
+            <span className="hidden sm:inline">Centrer</span>
+          </button>
+        </div>
+
         <div>
           <label className="text-xs text-dark-500">Rotation</label>
           <input

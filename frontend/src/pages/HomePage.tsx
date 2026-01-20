@@ -9,6 +9,9 @@ import {
   FileText,
   Plus,
   Presentation,
+  Settings,
+  LogOut,
+  Info,
 } from 'lucide-react';
 
 const categoryIcons: Record<string, React.ReactNode> = {
@@ -44,7 +47,7 @@ const projectTypes = [
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, logout, user } = useAuthStore();
 
   const handleCreateProject = (type: string, format?: PresetFormat) => {
     const dimensions = format?.dimensions || { width: 1080, height: 1080 };
@@ -81,6 +84,20 @@ export default function HomePage() {
                 <Link to="/projects" className="btn btn-ghost">
                   Mes projets
                 </Link>
+                <Link to="/account" className="btn btn-ghost flex items-center gap-2">
+                  <Settings className="w-4 h-4" />
+                  <span className="hidden sm:inline">Paramètres</span>
+                </Link>
+                <button
+                  onClick={() => {
+                    logout();
+                    navigate('/');
+                  }}
+                  className="btn btn-ghost flex items-center gap-2"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span className="hidden sm:inline">Déconnexion</span>
+                </button>
               </>
             ) : (
               <>
@@ -111,6 +128,29 @@ export default function HomePage() {
 
       {/* Types de projets */}
       <section className="max-w-7xl mx-auto px-6 py-16">
+        {/* Message d'information pour les utilisateurs non connectés */}
+        {!isAuthenticated && (
+          <div className="mb-8 bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
+            <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm text-blue-900 font-medium mb-1">
+                Créez gratuitement, mais connectez-vous pour sauvegarder
+              </p>
+              <p className="text-sm text-blue-700">
+                Vous pouvez commencer à créer immédiatement, mais vos projets ne seront pas sauvegardés.{' '}
+                <Link to="/register" className="underline font-medium hover:text-blue-900">
+                  Créez un compte gratuit
+                </Link>{' '}
+                ou{' '}
+                <Link to="/login" className="underline font-medium hover:text-blue-900">
+                  connectez-vous
+                </Link>{' '}
+                pour sauvegarder automatiquement vos créations.
+              </p>
+            </div>
+          </div>
+        )}
+
         <h2 className="text-2xl font-semibold text-dark-900 mb-8">
           Commencer un nouveau projet
         </h2>

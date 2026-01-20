@@ -19,27 +19,27 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $data = json_decode(file_get_contents('php://input'), true);
 
-$email = $data['email'] ?? '';
+$identifier = $data['email'] ?? ''; // Peut être email ou username
 $password = $data['password'] ?? '';
 
 // Validation
-if (empty($email) || empty($password)) {
+if (empty($identifier) || empty($password)) {
     http_response_code(400);
-    echo json_encode(['error' => 'Email et mot de passe requis']);
+    echo json_encode(['error' => 'Email/pseudo et mot de passe requis']);
     exit;
 }
 
 try {
     $db = getDatabase();
 
-    // Récupérer l'utilisateur
-    $stmt = $db->prepare('SELECT * FROM users WHERE email = ?');
-    $stmt->execute([$email]);
+    // Récupérer l'utilisateur par email OU username
+    $stmt = $db->prepare('SELECT * FROM users WHERE email = ? OR username = ?');
+    $stmt->execute([$identifier, $identifier]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$user || !password_verify($password, $user['password'])) {
         http_response_code(401);
-        echo json_encode(['error' => 'Email ou mot de passe incorrect']);
+        echo json_encode(['error' => 'Identifiant ou mot de passe incorrect']);
         exit;
     }
 
