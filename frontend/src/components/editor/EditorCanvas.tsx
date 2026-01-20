@@ -107,12 +107,12 @@ export default function EditorCanvas() {
           opacity: textEl.opacity,
           visible: textEl.visible,
           selectable: true,
-          lockMovementX: textEl.locked,
-          lockMovementY: textEl.locked,
-          lockRotation: textEl.locked,
-          lockScalingX: textEl.locked,
-          lockScalingY: textEl.locked,
-          hasControls: !textEl.locked,
+          lockMovementX: textEl.locked === true,
+          lockMovementY: textEl.locked === true,
+          lockRotation: textEl.locked === true,
+          lockScalingX: textEl.locked === true,
+          lockScalingY: textEl.locked === true,
+          hasControls: textEl.locked !== true,
         });
         break;
       }
@@ -198,12 +198,12 @@ export default function EditorCanvas() {
             opacity: shapeEl.opacity,
             visible: shapeEl.visible,
             selectable: true,
-            lockMovementX: shapeEl.locked,
-            lockMovementY: shapeEl.locked,
-            lockRotation: shapeEl.locked,
-            lockScalingX: shapeEl.locked,
-            lockScalingY: shapeEl.locked,
-            hasControls: !shapeEl.locked,
+            lockMovementX: shapeEl.locked === true,
+            lockMovementY: shapeEl.locked === true,
+            lockRotation: shapeEl.locked === true,
+            lockScalingX: shapeEl.locked === true,
+            lockScalingY: shapeEl.locked === true,
+            hasControls: shapeEl.locked !== true,
           });
         }
         break;
@@ -703,12 +703,12 @@ export default function EditorCanvas() {
             opacity: element.opacity,
             visible: element.visible,
             selectable: true,
-            lockMovementX: element.locked,
-            lockMovementY: element.locked,
-            lockRotation: element.locked,
-            lockScalingX: element.locked,
-            lockScalingY: element.locked,
-            hasControls: !element.locked,
+            lockMovementX: element.locked === true,
+            lockMovementY: element.locked === true,
+            lockRotation: element.locked === true,
+            lockScalingX: element.locked === true,
+            lockScalingY: element.locked === true,
+            hasControls: element.locked !== true,
           });
 
           // Désactiver le flag après un court délai
@@ -841,12 +841,12 @@ export default function EditorCanvas() {
                 visible: imgElement.visible,
                 lockScalingFlip: true,
                 lockUniScaling: imgElement.lockAspectRatio ?? true,
-                lockMovementX: imgElement.locked,
-                lockMovementY: imgElement.locked,
-                lockRotation: imgElement.locked,
-                lockScalingX: imgElement.locked,
-                lockScalingY: imgElement.locked,
-                hasControls: !imgElement.locked,
+                lockMovementX: imgElement.locked === true,
+                lockMovementY: imgElement.locked === true,
+                lockRotation: imgElement.locked === true,
+                lockScalingX: imgElement.locked === true,
+                lockScalingY: imgElement.locked === true,
+                hasControls: imgElement.locked !== true,
               });
 
               // Appliquer les filtres si présents
