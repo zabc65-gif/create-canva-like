@@ -272,6 +272,9 @@ export default function EditorCanvas() {
       offsetX, offsetY
     ]);
 
+    // Mettre à jour le zoom dans le store
+    setZoom(initialZoom);
+
     // Support tactile: pan et zoom
     let isPanning = false;
     let lastPosX = 0;
