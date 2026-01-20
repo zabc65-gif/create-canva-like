@@ -719,6 +719,11 @@ export default function EditorCanvas() {
             });
           }
 
+          // Appliquer lockUniScaling pour le redimensionnement manuel
+          existingObj.set({
+            lockUniScaling: imgEl.lockAspectRatio ?? true,
+          });
+
           // Appliquer les filtres
           if (imgEl.filters && existingObj.type === 'image') {
             applyFabricFilters(existingObj as fabric.Image, imgEl.filters);
@@ -775,7 +780,7 @@ export default function EditorCanvas() {
                 selectable: !imgElement.locked,
                 visible: imgElement.visible,
                 lockScalingFlip: true,
-                lockUniScaling: false,
+                lockUniScaling: imgElement.lockAspectRatio ?? true,
               });
 
               // Appliquer les filtres si présents

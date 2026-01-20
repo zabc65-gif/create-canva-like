@@ -99,6 +99,7 @@ export interface ImageElement extends BaseElement {
   originalSrc: string;
   filters: ImageFilters;
   cropArea?: CropArea;
+  lockAspectRatio?: boolean;
 }
 
 /**

@@ -44,13 +44,23 @@ export default function PropertiesPanel() {
   // State local pour forcer le re-render
   const [renderCount, setRenderCount] = useState(0);
 
-  // State pour le verrouillage du ratio (aspect ratio lock)
-  const [lockAspectRatio, setLockAspectRatio] = useState(true);
-
   // Récupérer l'élément sélectionné
   const element = project && selectedElementIds.length > 0
     ? project.elements.find(el => el.id === selectedElementIds[0]) || null
     : null;
+
+  // State pour le verrouillage du ratio (aspect ratio lock)
+  // Initialisé depuis l'élément si c'est une image, sinon true par défaut
+  const [lockAspectRatio, setLockAspectRatio] = useState(
+    element?.type === 'image' ? (element.lockAspectRatio ?? true) : true
+  );
+
+  // Synchroniser lockAspectRatio avec l'élément quand il change
+  useEffect(() => {
+    if (element?.type === 'image') {
+      setLockAspectRatio(element.lockAspectRatio ?? true);
+    }
+  }, [element?.id, element?.type]);
 
   // Forcer un re-render quand project.elements change
   useEffect(() => {
@@ -275,7 +285,16 @@ export default function PropertiesPanel() {
               <input
                 type="checkbox"
                 checked={lockAspectRatio}
-                onChange={(e) => setLockAspectRatio(e.target.checked)}
+                onChange={(e) => {
+                  const newValue = e.target.checked;
+                  setLockAspectRatio(newValue);
+                  // Sauvegarder dans l'élément si c'est une image
+                  if (element.type === 'image') {
+                    updateElement(element.id, {
+                      lockAspectRatio: newValue,
+                    } as any);
+                  }
+                }}
                 className="w-4 h-4 rounded border-dark-300 text-primary-600 focus:ring-primary-500"
               />
               <span className="text-xs text-dark-600">Conserver les proportions</span>
