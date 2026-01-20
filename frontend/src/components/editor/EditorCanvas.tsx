@@ -690,7 +690,7 @@ export default function EditorCanvas() {
           Math.abs(currentAngle - element.transform.rotation) > 0.1 ||
           existingObj.opacity !== element.opacity ||
           existingObj.visible !== element.visible ||
-          existingObj.selectable === element.locked;
+          (existingObj as any).lockMovementX !== (element.locked === true);
 
         if (needsUpdate) {
           // Activer le flag pour éviter les boucles de mise à jour
@@ -710,6 +710,9 @@ export default function EditorCanvas() {
             lockScalingY: element.locked === true,
             hasControls: element.locked !== true,
           });
+
+          // Forcer le rendu pour afficher les changements
+          canvas.renderAll();
 
           // Désactiver le flag après un court délai
           setTimeout(() => {
