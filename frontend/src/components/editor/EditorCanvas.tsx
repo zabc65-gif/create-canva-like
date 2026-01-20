@@ -106,7 +106,13 @@ export default function EditorCanvas() {
           scaleY: textEl.transform.scaleY,
           opacity: textEl.opacity,
           visible: textEl.visible,
-          selectable: !textEl.locked,
+          selectable: true,
+          lockMovementX: textEl.locked,
+          lockMovementY: textEl.locked,
+          lockRotation: textEl.locked,
+          lockScalingX: textEl.locked,
+          lockScalingY: textEl.locked,
+          hasControls: !textEl.locked,
         });
         break;
       }
@@ -191,7 +197,13 @@ export default function EditorCanvas() {
             scaleY,
             opacity: shapeEl.opacity,
             visible: shapeEl.visible,
-            selectable: !shapeEl.locked,
+            selectable: true,
+            lockMovementX: shapeEl.locked,
+            lockMovementY: shapeEl.locked,
+            lockRotation: shapeEl.locked,
+            lockScalingX: shapeEl.locked,
+            lockScalingY: shapeEl.locked,
+            hasControls: !shapeEl.locked,
           });
         }
         break;
@@ -690,7 +702,13 @@ export default function EditorCanvas() {
             angle: element.transform.rotation,
             opacity: element.opacity,
             visible: element.visible,
-            selectable: !element.locked,
+            selectable: true,
+            lockMovementX: element.locked,
+            lockMovementY: element.locked,
+            lockRotation: element.locked,
+            lockScalingX: element.locked,
+            lockScalingY: element.locked,
+            hasControls: !element.locked,
           });
 
           // Désactiver le flag après un court délai
@@ -819,10 +837,16 @@ export default function EditorCanvas() {
                 scaleY,
                 angle: imgElement.transform.rotation,
                 opacity: imgElement.opacity,
-                selectable: !imgElement.locked,
+                selectable: true,
                 visible: imgElement.visible,
                 lockScalingFlip: true,
                 lockUniScaling: imgElement.lockAspectRatio ?? true,
+                lockMovementX: imgElement.locked,
+                lockMovementY: imgElement.locked,
+                lockRotation: imgElement.locked,
+                lockScalingX: imgElement.locked,
+                lockScalingY: imgElement.locked,
+                hasControls: !imgElement.locked,
               });
 
               // Appliquer les filtres si présents
