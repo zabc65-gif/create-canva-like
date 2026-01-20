@@ -18,11 +18,50 @@ export default function VideoProperties({ element, onChange }: VideoPropertiesPr
   const [currentTime, setCurrentTime] = useState(element.startTime);
   const [isPlaying, setIsPlaying] = useState(false);
 
+  // Récupérer la vidéo du DOM
+  const getVideoElement = (): HTMLVideoElement | null => {
+    return document.getElementById(`video-${element.id}`) as HTMLVideoElement;
+  };
+
+  // Synchroniser l'état avec la vidéo
+  useEffect(() => {
+    const video = getVideoElement();
+    if (!video) return;
+
+    const handleTimeUpdate = () => {
+      setCurrentTime(video.currentTime);
+    };
+
+    const handlePlay = () => setIsPlaying(true);
+    const handlePause = () => setIsPlaying(false);
+
+    video.addEventListener('timeupdate', handleTimeUpdate);
+    video.addEventListener('play', handlePlay);
+    video.addEventListener('pause', handlePause);
+
+    return () => {
+      video.removeEventListener('timeupdate', handleTimeUpdate);
+      video.removeEventListener('play', handlePlay);
+      video.removeEventListener('pause', handlePause);
+    };
+  }, [element.id]);
+
   // Reset current time si l'élément change
   useEffect(() => {
     setCurrentTime(element.startTime);
     setIsPlaying(false);
   }, [element.id]);
+
+  const handlePlayPause = () => {
+    const video = getVideoElement();
+    if (!video) return;
+
+    if (isPlaying) {
+      video.pause();
+    } else {
+      video.play();
+    }
+  };
 
   const handleVolumeChange = (value: number) => {
     onChange('volume', value / 100);
@@ -71,6 +110,26 @@ export default function VideoProperties({ element, onChange }: VideoPropertiesPr
       {/* Contrôles de lecture */}
       <div className="space-y-3">
         <h4 className="sidebar-title">Lecture</h4>
+
+        {/* Bouton Play/Pause et temps */}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handlePlayPause}
+            className="btn-primary flex items-center justify-center w-10 h-10 rounded-full"
+            title={isPlaying ? 'Pause' : 'Lecture'}
+          >
+            {isPlaying ? (
+              <Pause className="w-5 h-5" />
+            ) : (
+              <Play className="w-5 h-5 ml-0.5" />
+            )}
+          </button>
+          <div className="flex-1 text-sm text-dark-700">
+            <span className="font-medium">{formatTime(currentTime)}</span>
+            <span className="text-dark-400"> / </span>
+            <span>{formatTime(element.duration)}</span>
+          </div>
+        </div>
 
         {/* Timeline visuelle */}
         <div className="relative h-12 bg-dark-100 rounded-lg p-2">

@@ -56,7 +56,7 @@ function VideoElementOverlay({
       opacity: element.opacity,
       display: element.visible ? 'block' : 'none',
       zIndex: element.zIndex + 1000,
-      pointerEvents: (isSelected && !element.locked ? 'auto' : 'none') as any,
+      pointerEvents: 'none' as any, // Toujours none pour permettre le drag via Fabric
       outline: isSelected ? '2px solid #8b5cf6' : 'none',
       outlineOffset: '-2px',
       transition: 'outline 0.15s ease',
@@ -156,10 +156,10 @@ function VideoElementOverlay({
   return (
     <video
       ref={videoRef}
+      id={`video-${element.id}`}
       src={element.src}
       style={videoStyle}
       preload="metadata"
-      controls={isSelected && !element.locked}
       playsInline
       className="select-none"
     />
