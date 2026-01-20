@@ -39,6 +39,7 @@ export default function PropertiesPanel() {
     project,
     selectedElementIds,
     setProject,
+    saveToHistory,
   } = useEditorStore();
 
   // State local pour forcer le re-render
@@ -152,6 +153,11 @@ export default function PropertiesPanel() {
 
   const handleChange = (key: string, value: unknown) => {
     updateElement(element.id, { [key]: value } as any);
+    // Sauvegarder dans l'historique après chaque modification importante
+    // Particulièrement important pour le verrouillage
+    if (key === 'locked' || key === 'visible') {
+      saveToHistory();
+    }
   };
 
   const handleTransformChange = (key: string, value: number) => {
@@ -308,7 +314,8 @@ export default function PropertiesPanel() {
               type="number"
               value={Math.round(element.transform.x)}
               onChange={(e) => handleTransformChange('x', parseFloat(e.target.value))}
-              className="input text-sm"
+              disabled={element.locked === true}
+              className={`input text-sm ${element.locked === true ? 'bg-dark-100 cursor-not-allowed opacity-60' : ''}`}
             />
           </div>
           <div>
@@ -317,7 +324,8 @@ export default function PropertiesPanel() {
               type="number"
               value={Math.round(element.transform.y)}
               onChange={(e) => handleTransformChange('y', parseFloat(e.target.value))}
-              className="input text-sm"
+              disabled={element.locked === true}
+              className={`input text-sm ${element.locked === true ? 'bg-dark-100 cursor-not-allowed opacity-60' : ''}`}
             />
           </div>
           <div>
@@ -326,7 +334,8 @@ export default function PropertiesPanel() {
               type="number"
               value={Math.round(element.transform.width)}
               onChange={(e) => handleTransformChange('width', parseFloat(e.target.value))}
-              className="input text-sm"
+              disabled={element.locked === true}
+              className={`input text-sm ${element.locked === true ? 'bg-dark-100 cursor-not-allowed opacity-60' : ''}`}
             />
           </div>
           <div>
@@ -335,7 +344,8 @@ export default function PropertiesPanel() {
               type="number"
               value={Math.round(element.transform.height)}
               onChange={(e) => handleTransformChange('height', parseFloat(e.target.value))}
-              className="input text-sm"
+              disabled={element.locked === true}
+              className={`input text-sm ${element.locked === true ? 'bg-dark-100 cursor-not-allowed opacity-60' : ''}`}
             />
           </div>
         </div>
@@ -344,7 +354,8 @@ export default function PropertiesPanel() {
         <div className="flex gap-2">
           <button
             onClick={centerHorizontally}
-            className="flex-1 btn-secondary text-xs py-2 flex items-center justify-center gap-1"
+            disabled={element.locked === true}
+            className={`flex-1 btn-secondary text-xs py-2 flex items-center justify-center gap-1 ${element.locked === true ? 'opacity-60 cursor-not-allowed' : ''}`}
             title="Centrer horizontalement"
           >
             <AlignHorizontalJustifyCenter size={14} />
@@ -352,7 +363,8 @@ export default function PropertiesPanel() {
           </button>
           <button
             onClick={centerVertically}
-            className="flex-1 btn-secondary text-xs py-2 flex items-center justify-center gap-1"
+            disabled={element.locked === true}
+            className={`flex-1 btn-secondary text-xs py-2 flex items-center justify-center gap-1 ${element.locked === true ? 'opacity-60 cursor-not-allowed' : ''}`}
             title="Centrer verticalement"
           >
             <AlignVerticalJustifyCenter size={14} />
@@ -360,7 +372,8 @@ export default function PropertiesPanel() {
           </button>
           <button
             onClick={centerBoth}
-            className="flex-1 btn-secondary text-xs py-2 flex items-center justify-center gap-1"
+            disabled={element.locked === true}
+            className={`flex-1 btn-secondary text-xs py-2 flex items-center justify-center gap-1 ${element.locked === true ? 'opacity-60 cursor-not-allowed' : ''}`}
             title="Centrer complètement"
           >
             <Maximize2 size={14} />
@@ -376,7 +389,8 @@ export default function PropertiesPanel() {
             max="180"
             value={element.transform.rotation}
             onChange={(e) => handleTransformChange('rotation', parseFloat(e.target.value))}
-            className="w-full"
+            disabled={element.locked === true}
+            className={`w-full ${element.locked === true ? 'opacity-60 cursor-not-allowed' : ''}`}
           />
           <span className="text-xs text-dark-500">{Math.round(element.transform.rotation)}°</span>
         </div>
